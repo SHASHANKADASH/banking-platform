@@ -2,6 +2,7 @@ package org.shashanka.fraud.service;
 
 import lombok.extern.log4j.Log4j2;
 import org.shashanka.fraud.domain.UserRiskProfile;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -9,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 @Service
@@ -18,7 +18,7 @@ public class FraudService {
     private final Map<Long, UserRiskProfile> riskCache = new ConcurrentHashMap<>();
     private final Executor executor;
 
-    public FraudService(Executor executor) {
+    public FraudService(@Qualifier("fraud-check") Executor executor) {
         this.executor = executor;
     }
 
@@ -33,12 +33,14 @@ public class FraudService {
         final CompletableFuture<Boolean> merchantCompletableFuture = CompletableFuture.supplyAsync(
                 () -> merchantCheck(merchant), executor
         );
-        try {
-            return velocityCompletableFuture.get() && merchantCompletableFuture.get() && amountCompletableFuture.get();
-        } catch (InterruptedException | ExecutionException e) {
-            log.error(e);
-            return false;
-        }
+        // To know why we should not use .get() follow the below links
+        // https://www.baeldung.com/java-completablefuture-allof-join
+        // https://www.baeldung.com/java-completablefuture-join-vs-get
+        // return velocityCompletableFuture.get() && merchantCompletableFuture.get() && amountCompletableFuture.get();
+        return CompletableFuture.allOf(velocityCompletableFuture, amountCompletableFuture, merchantCompletableFuture)
+                .thenApply(v -> velocityCompletableFuture.join()
+                        && merchantCompletableFuture.join() && amountCompletableFuture.join())
+                .join();
     }
 
     private boolean velocity(final Long accountId) {

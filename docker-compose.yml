@@ -1,0 +1,87 @@
+version: '3.9'
+
+services:
+
+  springboot-app:
+    build: .
+    container_name: springboot-app
+    volumes:
+      - ./logs:/app/logs
+      - ./otel/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+    environment:
+      OTEL_SERVICE_NAME: springboot-app
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: postgres
+    environment:
+      POSTGRES_DB: payments
+      POSTGRES_USER: postgres
+      # only for testing
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - springboot-app
+
+  loki:
+    image: grafana/loki
+    container_name: loki
+    ports:
+      - "3100:3100"
+
+  alloy:
+    image: grafana/alloy
+    container_name: alloy
+    ports:
+      - "12345:12345"
+    volumes:
+      - ./alloy/config.alloy:/etc/alloy/config.alloy
+      - ./logs:/logs
+    command:
+      - run
+      - /etc/alloy/config.alloy
+    depends_on:
+      - loki
+
+  tempo:
+    image: grafana/tempo
+    container_name: tempo
+    ports:
+      - "3200:3200" # tempo
+      - "4317:4317" # Tempo OTLP GRPC
+      - "4318:4318" # Tempo OTLP HTTP
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo.yaml
+    command: "-target=all -config.file=/etc/tempo.yaml"
+
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+      - loki
+
+volumes:
+  postgres-data:
