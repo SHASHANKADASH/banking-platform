@@ -3,6 +3,7 @@ package org.shashanka.service;
 import lombok.extern.log4j.Log4j2;
 import org.shashanka.domain.PaymentRequest;
 import org.shashanka.domain.SimulationRequest;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ public class PaymentSimulationService {
     private final Executor executorService;
     private final PaymentService paymentService;
 
-    public PaymentSimulationService(Executor executorService, PaymentService paymentService) {
+    public PaymentSimulationService(@Qualifier("default") Executor executorService, PaymentService paymentService) {
         this.executorService = executorService;
         this.paymentService = paymentService;
     }
