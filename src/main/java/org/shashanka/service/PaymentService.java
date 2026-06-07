@@ -1,7 +1,10 @@
 package org.shashanka.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.MarkerManager;
+import org.shashanka.domain.PaymentProcessedEvent;
 import org.shashanka.exception.FraudDetectedException;
 import org.shashanka.exception.InsufficientBalanceException;
 import org.shashanka.exception.ResourceNotFoundException;
@@ -10,6 +13,7 @@ import org.shashanka.domain.PaymentResponse;
 import org.shashanka.entity.AccountModel;
 import org.shashanka.entity.PaymentModel;
 import org.shashanka.fraud.service.FraudService;
+import org.shashanka.kafka.producer.PaymentEventProducer;
 import org.shashanka.repository.AccountRepository;
 import org.shashanka.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
@@ -18,18 +22,12 @@ import java.time.LocalDateTime;
 
 @Service
 @Log4j2
+@RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AccountRepository accountRepository;
     private final FraudService fraudService;
-
-    public PaymentService(PaymentRepository paymentRepository,
-                          AccountRepository accountRepository,
-                          FraudService fraudService) {
-        this.paymentRepository = paymentRepository;
-        this.accountRepository = accountRepository;
-        this.fraudService = fraudService;
-    }
+    private final PaymentEventProducer paymentEventProducer;
 
     // follows proxy pattern in spring. Enables atomicity
     @Transactional
@@ -52,9 +50,20 @@ public class PaymentService {
         log.info("Balance after update {}", account.getBalance());
         final PaymentModel paymentModel = getPayment(payment, account.getId());
         paymentRepository.save(paymentModel);
+        paymentEventProducer.publishEvent(getPaymentProcessedEvent(payment, paymentModel));
         return PaymentResponse.builder().paymentId(paymentModel.getId())
                 .status(paymentModel.getStatus())
                 .remainingBalance(account.getBalance()).build();
+    }
+
+    private static PaymentProcessedEvent getPaymentProcessedEvent(PaymentRequest payment, PaymentModel paymentModel) {
+        return new PaymentProcessedEvent(
+                paymentModel.getId(),
+                paymentModel.getAccountId(),
+                paymentModel.getAmount(),
+                payment.getMerchant(),
+                paymentModel.getStatus()
+        );
     }
 
     private static PaymentModel getPayment(PaymentRequest payment, Long id) {
