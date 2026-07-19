@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: nginx-deployment
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: nginx-service
+
+  template:
+    metadata:
+      labels:
+        app: nginx-service
+
+    spec:
+      containers:
+        - name: nginx-service
+          #image: nginx:alpine
+          image: nginx:mainline-alpine
+          imagePullPolicy: IfNotPresent
+#          env:
+#            - name: APP_NAME
+#              valueFrom:
+#                configMapKeyRef:
+#                  name: nginx-config
+#                  key: APP_NAME
+#          envFrom:
+#            - configMapRef:
+#                name: nginx-config # imports the whole config map
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/config
+
+          ports:
+            - containerPort: 8080
+      volumes:
+        - name: config-volume
+          configMap:
+            name: nginx-config
