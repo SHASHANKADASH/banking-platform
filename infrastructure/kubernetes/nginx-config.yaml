@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: nginx-config
+
+#data:
+#  APP_NAME: Nginx Test App
+#  ENVIRONMENT: local
+#  LOG_LEVEL: INFO
+
+data:
+  application.properties: |
+    app.name=Nginx Test App
+    log.level=INFO
+    environment=local

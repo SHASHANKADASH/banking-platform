@@ -5,20 +5,20 @@ LABEL authors="shashanka"
 WORKDIR /app
 
 COPY pom.xml .
+COPY account-service/pom.xml account-service/pom.xml
+COPY account-service/src account-service/src
 
 # To prevent downloading dependencies unless there is a change in pom.xml
-RUN mvn dependency:go-offline -B
+# RUN mvn dependency:go-offline -B
 
-COPY src ./src
-
-RUN mvn clean package -DskipTests
+RUN mvn clean package -pl account-service -am -DskipTests
 
 # ---------- Runtime Stage ----------
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/account-service/target/*.jar app.jar
 
 EXPOSE 8080
 
