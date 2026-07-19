@@ -5,8 +5,10 @@ LABEL authors="shashanka"
 WORKDIR /app
 
 COPY pom.xml .
-COPY account-service/pom.xml account-service/pom.xml
-COPY account-service/src account-service/src
+COPY payment-service payment-service
+COPY account-service account-service
+# COPY account-service/pom.xml account-service/pom.xml
+# COPY account-service/src account-service/src
 
 # To prevent downloading dependencies unless there is a change in pom.xml
 # RUN mvn dependency:go-offline -B
