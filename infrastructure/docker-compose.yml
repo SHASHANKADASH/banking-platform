@@ -20,6 +20,24 @@ services:
       - postgres
       - kafka
 
+  payments-app:
+    build:
+      context: ..
+      dockerfile: payment-service/Dockerfile
+    container_name: payments-app
+    volumes:
+      - ./logs:/app/logs
+      - ./otel/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+    environment:
+      OTEL_SERVICE_NAME: payments-app
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - kafka
+
   postgres:
     image: postgres:16
     container_name: postgres

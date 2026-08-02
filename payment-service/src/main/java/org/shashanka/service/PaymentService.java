@@ -3,7 +3,6 @@ package org.shashanka.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.MarkerManager;
 import org.shashanka.domain.PaymentProcessedEvent;
 import org.shashanka.exception.FraudDetectedException;
 import org.shashanka.exception.InsufficientBalanceException;

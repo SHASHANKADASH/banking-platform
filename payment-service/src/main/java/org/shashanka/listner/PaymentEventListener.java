@@ -15,7 +15,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 public class PaymentEventListener {
 
     // Gets executed even if there was any failure
-    // Without async this will be executed by tomcat nio thread which asynchronous
+    // Without async this will be executed by tomcat nio thread which is asynchronous
     @Async
     @EventListener
     public void handlePaymentCompleted(final PaymentCompletedEvent paymentCompletedEvent) {

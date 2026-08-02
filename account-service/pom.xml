@@ -7,7 +7,7 @@
 		<groupId>org.shashanka</groupId>
 		<artifactId>banking-platform</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
-		<relativePath/>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>account-service</artifactId>
