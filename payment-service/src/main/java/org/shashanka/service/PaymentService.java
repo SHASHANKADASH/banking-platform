@@ -11,13 +11,16 @@ import org.shashanka.domain.PaymentRequest;
 import org.shashanka.domain.PaymentResponse;
 import org.shashanka.entity.AccountModel;
 import org.shashanka.entity.PaymentModel;
-import org.shashanka.fraud.service.FraudService;
+import org.shashanka.fraud.domain.FraudCheckRequest;
+import org.shashanka.fraud.domain.FraudCheckResponse;
 import org.shashanka.kafka.producer.PaymentEventProducer;
 import org.shashanka.repository.AccountRepository;
 import org.shashanka.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Service
 @Log4j2
@@ -25,7 +28,7 @@ import java.time.LocalDateTime;
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final AccountRepository accountRepository;
-    private final FraudService fraudService;
+    private final RestClient fraudServiceRestClient;
     private final PaymentEventProducer paymentEventProducer;
 
     // follows proxy pattern in spring. Enables atomicity
@@ -40,8 +43,8 @@ public class PaymentService {
             throw new InsufficientBalanceException("Insufficient Balance");
         }
         log.info("Balance before update {}", account.getBalance());
-        final boolean transactionAllowed = fraudService.runFraudChecks(account.getId(), payment.getAmount(), payment.getMerchant());
-        if(!transactionAllowed) {
+        final FraudCheckResponse fraudCheckResponse = getFraudCheckResponse(payment);
+        if (Objects.isNull(fraudCheckResponse) || !fraudCheckResponse.getApproved()) {
             throw new FraudDetectedException("Fraud detected");
         }
         account.setBalance(remainingBalance);
@@ -81,5 +84,13 @@ public class PaymentService {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private FraudCheckResponse getFraudCheckResponse(final PaymentRequest payment) {
+        return fraudServiceRestClient.post()
+                .uri("/fraud/check")
+                .body(new FraudCheckRequest(payment.getAccountId(), payment.getAmount(), payment.getMerchant()))
+                .retrieve()
+                .body(FraudCheckResponse.class);
     }
 }
