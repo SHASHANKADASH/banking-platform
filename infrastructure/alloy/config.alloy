@@ -1,8 +1,14 @@
 local.file_match "spring_logs" {
   path_targets = [
     {
-      __path__ = "/logs/application.log",
-      job = "springboot",
+      __path__ = "./logs/account-service.log",
+      job = "spring",
+      service = "account-service",
+    },
+    {
+      __path__ = "./logs/payment-service.log",
+      job = "spring",
+      service = "payment-service",
     },
   ]
 }
