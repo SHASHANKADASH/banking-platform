@@ -2,16 +2,16 @@ version: '3.9'
 
 services:
 
-  springboot-app:
+  account-service:
     build:
       context: ..
       dockerfile: account-service/Dockerfile
-    container_name: springboot-app
+    container_name: account-service
     volumes:
       - ./logs:/app/logs
       - ./otel/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
     environment:
-      OTEL_SERVICE_NAME: springboot-app
+      OTEL_SERVICE_NAME: account-service
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4317
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     ports:
@@ -20,16 +20,16 @@ services:
       - postgres
       - kafka
 
-  payments-app:
+  payment-service:
     build:
       context: ..
       dockerfile: payment-service/Dockerfile
-    container_name: payments-app
+    container_name: payment-service
     volumes:
       - ./logs:/app/logs
       - ./otel/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
     environment:
-      OTEL_SERVICE_NAME: payments-app
+      OTEL_SERVICE_NAME: payment-service
       OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4317
       OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     ports:
@@ -59,7 +59,8 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     depends_on:
-      - springboot-app
+      - account-service
+      - payment-service
 
   loki:
     image: grafana/loki
