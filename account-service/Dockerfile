@@ -4,16 +4,18 @@ LABEL authors="shashanka"
 
 WORKDIR /app
 
+# Copy only POMs first
 COPY pom.xml .
-COPY payment-service payment-service
-COPY account-service account-service
-# COPY account-service/pom.xml account-service/pom.xml
-# COPY account-service/src account-service/src
+COPY account-service/pom.xml account-service/pom.xml
+COPY payment-service/pom.xml payment-service/pom.xml
 
-# To prevent downloading dependencies unless there is a change in pom.xml
-# RUN mvn dependency:go-offline -B
+# Download dependencies
+RUN mvn dependency:go-offline -pl account-service -am
 
-RUN mvn clean package -pl account-service -am -DskipTests
+# Now copy source
+COPY account-service/src account-service/src
+
+RUN mvn package -pl account-service -am -DskipTests
 
 # ---------- Runtime Stage ----------
 FROM eclipse-temurin:21-jre-alpine
@@ -25,4 +27,4 @@ COPY --from=build /app/account-service/target/*.jar app.jar
 EXPOSE 8080
 
 # ENTRYPOINT ["java", "-jar", "app.jar"]
-ENTRYPOINT ["java","-javaagent:/otel/opentelemetry-javaagent.jar","-Dotel.service.name=payment-fraud-detection-service","-Dotel.traces.sampler=always_on","-Dotel.instrumentation.logback-appender.enabled=true","-jar","app.jar"]
+ENTRYPOINT ["java","-javaagent:/otel/opentelemetry-javaagent.jar","-Dotel.service.name=account-service","-Dotel.traces.sampler=always_on","-Dotel.instrumentation.logback-appender.enabled=true","-jar","app.jar"]
