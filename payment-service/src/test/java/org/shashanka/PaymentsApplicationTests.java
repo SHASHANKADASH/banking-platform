@@ -1,0 +1,11 @@
+package org.shashanka;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+public class PaymentsApplicationTests {
+    @Test
+    void contextLoads() {
+    }
+}
