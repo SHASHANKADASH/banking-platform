@@ -10,6 +10,11 @@ local.file_match "spring_logs" {
       job = "spring",
       service = "payment-service",
     },
+    {
+      __path__ = "./logs/fraud-service.log",
+      job = "spring",
+      service = "fraud-service",
+    },
   ]
 }
 

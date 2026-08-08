@@ -38,6 +38,24 @@ services:
       - postgres
       - kafka
 
+  fraud-service:
+    build:
+      context: ..
+      dockerfile: fraud-service/Dockerfile
+    container_name: fraud-service
+    volumes:
+      - ./logs:/app/logs
+      - ./otel/opentelemetry-javaagent.jar:/otel/opentelemetry-javaagent.jar
+    environment:
+      OTEL_SERVICE_NAME: payment-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://alloy:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - kafka
+
   postgres:
     image: postgres:16
     container_name: postgres

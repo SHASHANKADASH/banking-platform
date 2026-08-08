@@ -8,9 +8,9 @@ import org.springframework.web.client.RestClient;
 @Configuration
 public class FraudServiceRestClient {
     @Bean
-    RestClient fraudServiceRestClient() {
+    RestClient restClient() {
         return RestClient.builder()
-                .baseUrl("http://localhost:8082")
+                .baseUrl("http://fraud-service:8082")
                 .defaultHeader(HttpHeaders.ACCEPT, "application/json")
                 .build();
     }

@@ -17,7 +17,7 @@
 	<modules>
 		<module>account-service</module>
 		<module>payment-service</module>
-<!--		<module>fraud-service</module>-->
+		<module>fraud-service</module>
 	</modules>
 
 	<properties>
