@@ -8,6 +8,7 @@ WORKDIR /app
 COPY pom.xml .
 COPY account-service/pom.xml account-service/pom.xml
 COPY payment-service/pom.xml payment-service/pom.xml
+COPY fraud-service/pom.xml fraud-service/pom.xml
 
 # Download dependencies
 RUN mvn dependency:go-offline -pl account-service -am

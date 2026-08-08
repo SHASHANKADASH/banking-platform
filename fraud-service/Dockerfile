@@ -14,18 +14,18 @@ COPY fraud-service/pom.xml fraud-service/pom.xml
 RUN mvn dependency:go-offline -pl account-service -am
 
 # Now copy source
-COPY account-service/src account-service/src
+COPY fraud-service/src fraud-service/src
 
-RUN mvn package -pl account-service -am -DskipTests
+RUN mvn package -pl fraud-service -am -DskipTests
 
 # ---------- Runtime Stage ----------
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/account-service/target/*.jar app.jar
+COPY --from=build /app/fraud-service/target/*.jar app.jar
 
-EXPOSE 8080
+EXPOSE 8082
 
 # ENTRYPOINT ["java", "-jar", "app.jar"]
-ENTRYPOINT ["java","-javaagent:/otel/opentelemetry-javaagent.jar","-Dotel.service.name=account-service","-Dotel.traces.sampler=always_on","-Dotel.instrumentation.logback-appender.enabled=true","-jar","app.jar"]
+ENTRYPOINT ["java","-javaagent:/otel/opentelemetry-javaagent.jar","-Dotel.service.name=fraud-service","-Dotel.traces.sampler=always_on","-Dotel.instrumentation.logback-appender.enabled=true","-jar","app.jar"]
