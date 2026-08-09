@@ -27,5 +27,5 @@ COPY --from=build /app/account-service/target/*.jar app.jar
 
 EXPOSE 8080
 
-# ENTRYPOINT ["java", "-jar", "app.jar"]
-ENTRYPOINT ["java","-javaagent:/otel/opentelemetry-javaagent.jar","-Dotel.service.name=account-service","-Dotel.traces.sampler=always_on","-Dotel.instrumentation.logback-appender.enabled=true","-jar","app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+# ENTRYPOINT ["java","-javaagent:/otel/opentelemetry-javaagent.jar","-Dotel.service.name=account-service","-Dotel.traces.sampler=always_on","-Dotel.instrumentation.logback-appender.enabled=true","-jar","app.jar"]

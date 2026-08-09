@@ -1,6 +1,0 @@
-kind create cluster --name payment-cluster // docker must be running
-kubectl cluster-info
-kubectl get nodes
-
-load postgres image into kind:
-kind load docker-image postgres:16 --name payment-cluster

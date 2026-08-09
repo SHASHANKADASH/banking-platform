@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: account-service
+  namespace: banking-platform
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: account-service
+
+  template:
+    metadata:
+      labels:
+        app: account-service
+
+    spec:
+      containers:
+        - name: account-service
+          image: account-service:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
