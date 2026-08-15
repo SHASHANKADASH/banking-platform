@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: fraud-service
+  namespace: banking-platform
+
+spec:
+  replicas: 1
+
+  selector:
+    matchLabels:
+      app: fraud-service
+
+  template:
+    metadata:
+      labels:
+        app: fraud-service
+
+    spec:
+      containers:
+        - name: fraud-service
+          image: fraud-service:1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8082
